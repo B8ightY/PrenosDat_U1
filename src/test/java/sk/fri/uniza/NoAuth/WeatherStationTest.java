@@ -111,7 +111,6 @@ public class WeatherStationTest {
             assertTrue(body.size() == 3);
             System.out.println(body);
         } catch (IOException e) {
-
             assertTrue(false, e.getMessage());
         }
     }
@@ -154,9 +153,7 @@ public class WeatherStationTest {
         IotNode iotNode = new IotNode();
         Call<List<WeatherData>> currentWeather =
                 iotNode.getWeatherStationService()
-                        .getHistoryWeather("station_1", "01/01/2020 00:00",
-                                "02" +
-                                        "/01/2020 00:00");
+                        .getHistoryWeather("station_1", "01/01/2020 00:00", "02" + "/01/2020 00:00");
         try {
             Response<List<WeatherData>> response = currentWeather.execute();
             assertTrue(response.isSuccessful(),
@@ -180,9 +177,7 @@ public class WeatherStationTest {
 
             System.out.println(body);
         } catch (IOException e) {
-
             assertTrue(false, e.getMessage());
         }
     }
-
 }

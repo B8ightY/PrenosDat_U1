@@ -12,41 +12,63 @@ import java.util.Map;
 
 public interface WeatherStationService {
 
-    // ... getCurrentWeatherAsMap(station);
+    @GET("/weather/{station}/current")
+    Call<Map<String, String>> getCurrentWeatherAsMap(
+            @Path("station") String station);
 
+    @GET("/weather/{station}/current")
+    Call<Map<String, String>> getCurrentWeatherAsMap(
+            @Path("station") String station,
+            @Query("fields") List<String> fields);
 
-    // ... getCurrentWeatherAsMap(station, fields);
+    @GET("/weather/locations")
+    Call<List<Location>> getStationLocations();
 
+    @GET("/weather/{station}/current")
+    Call<WeatherData> getCurrentWeather(@Path("station") String station);
 
-    // ... getStationLocations();
+    @GET("/weather/{station}/current")
+    Call<WeatherData> getCurrentWeather(@Path("station") String station,
+                                        @Query("fields") List<String> fields);
 
+    @GET("/weather/{station}/history")
+    Call<List<WeatherData>> getHistoryWeather(@Path("station") String station,
+                                              @Query("from") String from,
+                                              @Query("to") String to);
 
-    // ... getCurrentWeather(station);
+    @GET("/weather/{station}/history")
+    Call<List<WeatherData>> getHistoryWeather(@Path("station") String station,
+                                              @Query("from") String from,
+                                              @Query("to") String to,
+                                              @Query("fields") List<String> fields);
 
+    @FormUrlEncoded
+    @POST("/apikey/createjwt")
+    Call<Token> getToken(@Header("Authorization") String authorization,
+                         @Field("claims") List<String> claims);
 
-    // ... getCurrentWeather(station, fields);
+    @GET("/weather/locations")
+    Call<List<Location>> getStationLocationsAuth(@Header("Authorization") String authorization);
 
+    @GET("/weather/{station}/current")
+    Call<WeatherData> getCurrentWeatherAuth(@Header("Authorization") String authorization,
+                                            @Path("station") String station);
 
-    // ... getHistoryWeather(station, from, to);
+    @GET("/weather/{station}/current")
+    Call<WeatherData> getCurrentWeatherAuth(@Header("Authorization") String authorization,
+                                            @Path("station") String station,
+                                            @Query("fields") List<String> fields);
 
+    @GET("/weather/{station}/history")
+    Call<List<WeatherData>> getHistoryWeatherAuth(@Header("Authorization") String authorization,
+                                                  @Path("station") String station,
+                                                  @Query("from") String from,
+                                                  @Query("to") String to);
 
-    // ... getHistoryWeather(  station, from, to, fields);
-
-    // ... getToken(authorization, claims);
-
-
-    // ... getStationLocationsAuth(authorization);
-
-
-    // ... getCurrentWeatherAuth(authorization, station);
-
-
-    // ... getCurrentWeatherAuth(authorization, station, fields);
-
-
-    // ... getHistoryWeatherAuth(authorization, station, from, to);
-
-
-    // ... getHistoryWeatherAuth(authorization, station, from, to, fields);
-
+    @GET("/weather/{station}/history")
+    Call<List<WeatherData>> getHistoryWeatherAuth(@Header("Authorization") String authorization,
+                                                  @Path("station") String station,
+                                                  @Query("from") String from,
+                                                  @Query("to") String to,
+                                                  @Query("fields") List<String> fields);
 }
