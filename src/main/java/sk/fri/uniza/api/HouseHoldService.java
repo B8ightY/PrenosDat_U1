@@ -2,13 +2,17 @@ package sk.fri.uniza.api;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
-import retrofit2.http.Body;
-import retrofit2.http.POST;
-import retrofit2.http.Path;
+import retrofit2.http.*;
 import sk.fri.uniza.model.HouseHoldData;
 import sk.fri.uniza.model.HouseHoldField;
 
+import java.util.List;
+
 public interface HouseHoldService {
+
+    @GET("/field")
+    Call<List<HouseHoldField>> getAllFields();
+
     @POST("/field")
     Call<ResponseBody> createField(@Body HouseHoldField field);
 

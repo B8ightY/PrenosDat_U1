@@ -2,16 +2,11 @@ package sk.fri.uniza;
 
 import retrofit2.Call;
 import retrofit2.Response;
-import sk.fri.uniza.model.HouseHoldData;
-import sk.fri.uniza.model.HouseHoldField;
-import sk.fri.uniza.model.Token;
-import sk.fri.uniza.model.WeatherData;
+import sk.fri.uniza.model.*;
 
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -26,20 +21,17 @@ public class App {
         Token token = new Token();
         token.setToken(token.createToken(iotNode));
 
-        System.out.println("\nPriemerna teplota: " + iotNode.getAverageTemperature(token.getToken(),"station_1",
-                "10/12/2019 20:30", "11/12/2019 20:30") + "°C");
+        // Ziska a zobrazi historicke data
+        System.out.println("\nAverage history temp from 10/12/2019 20:30 to 11/12/2019 20:30 is: "
+                + iotNode.getAverageTemperature(token.getToken(),"station_1",
+                "10/12/2019 20:30", "11/12/2019 20:30") + "°C\n");
 
-        // Prida field
-        HouseHoldField stationNameField = new HouseHoldField("stationName", null, "Názov stanice");
-        Call stationNameFieldCall = houseHold.getHouseHoldService().createField(stationNameField);
-        try {
-            stationNameFieldCall.execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // Skontroluje existujuce fieldy v tabulke a prida pozadovane chybajuce
+        String[] reqFields = {"airTemp", "windSpeed", "stationName"};
+        HouseHoldField.checkExistingFields(houseHold, reqFields);
 
-        // Posiela data kazdu minutu
-        /*while(true) {
+        // Posiela na HouseHold vybrane udaje o pocasi kazdu minutu
+        while(true) {
             Call<WeatherData> currentWeatherCall = iotNode.getWeatherStationService().getCurrentWeatherAuth(token.getToken(), "station_1");
 
             try {
@@ -49,27 +41,28 @@ public class App {
                     WeatherData currentWeather = weatherDataResponse.body();
                     String dateTime = (new SimpleDateFormat("dd/MM/yyyy HH:mm")).format(new Date());
 
+                    assert currentWeather != null;
                     HouseHoldData airTemp = new HouseHoldData(dateTime, currentWeather.getAirTemperature().toString(), "double");
                     HouseHoldData windSpeed = new HouseHoldData(dateTime, currentWeather.getWindSpeed().toString(), "double");
                     HouseHoldData stationName = new HouseHoldData(dateTime, currentWeather.getStationName(), "string");
 
-                    Call airTempCall = houseHold.getHouseHoldService().sendHouseHoldData("1", "airTemp", airTemp);
-                    Call windSpeedCall = houseHold.getHouseHoldService().sendHouseHoldData("1", "windSpeed", windSpeed);
-                    Call stationNameCall = houseHold.getHouseHoldService().sendHouseHoldData("1", "stationName", stationName);
-
-                    Response airTempResponse = airTempCall.execute();
-                    Response windSpeedResponse = windSpeedCall.execute();
-                    Response stationNameResponse = stationNameCall.execute();
-
-                    if(!airTempResponse.isSuccessful()) System.out.println("An error occurred in attempt to send \"airTemp\"");
-                    if(!windSpeedResponse.isSuccessful()) System.out.println("An error occurred in attempt to send \"windSpeed\"");
-                    if(!stationNameResponse.isSuccessful()) System.out.println("An error occurred in attempt to send \"stationName\"");
+                    checkSendSuccess((houseHold.getHouseHoldService().sendHouseHoldData("1", reqFields[0], airTemp)).execute(), reqFields[0]);
+                    checkSendSuccess((houseHold.getHouseHoldService().sendHouseHoldData("1", reqFields[1], windSpeed)).execute(), reqFields[1]);
+                    checkSendSuccess((houseHold.getHouseHoldService().sendHouseHoldData("1", reqFields[2], stationName)).execute(), reqFields[2]);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
             TimeUnit.MINUTES.sleep(1);
-        }*/
+        }
+    }
+
+    private static void checkSendSuccess(Response response, String valueName) {
+        if(response.isSuccessful())
+            System.out.println("INFO  [" + (new SimpleDateFormat("dd/MM/yyyy HH:mm:ss,SSS"))
+                    .format(new Date()) + "] Value \"" + valueName + "\" sent successfully");
+        else System.out.println("ERROR  [" + (new SimpleDateFormat("dd/MM/yyyy HH:mm:ss,SSS"))
+                .format(new Date()) + "] Failed to send value: \"" + valueName + "\"");
     }
 }
