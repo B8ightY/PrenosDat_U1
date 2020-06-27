@@ -13,7 +13,7 @@ public class Token {
     private String token;
 
     public String getToken() {
-        return this.token;
+        return token;
     }
 
     public void setToken(String token) {
