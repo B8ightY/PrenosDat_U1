@@ -74,6 +74,6 @@ public class App {
             System.out.println("INFO  [" + dtFormatLong.format(new Date())
                     + "] Value \"" + valueName + "\" sent successfully");
         else System.out.println("ERROR  [" + dtFormatLong.format(new Date())
-                + "] Failed to send value: \"" + valueName + "\"");
+                + "] Failed to send value \"" + valueName + "\"");
     }
 }

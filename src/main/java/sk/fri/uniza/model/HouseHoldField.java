@@ -99,19 +99,17 @@ public class HouseHoldField {
                 break;
 
             default:
-                System.out.println("ERROR  [" + dtFormatLong.format(new Date())
-                        + "] No rule to add field with name: \"" + name + "\"");
-                throw new IllegalStateException("Unexpected value: " + name);
+                throw new IllegalStateException("No rule to add field with name \"" + name + "\"");
         }
 
-        System.out.println("INFO  [" + dtFormatLong.format(new Date()) + "] Adding missing field: \"" + name + "\"");
+        System.out.println("INFO  [" + dtFormatLong.format(new Date()) + "] Adding missing field \"" + name + "\"");
 
         try {
             if(((houseHold.getHouseHoldService().createField(stationNameField)).execute()).isSuccessful())
                 System.out.println("INFO  [" + dtFormatLong.format(new Date())
                         + "] Field \"" + name + "\" added successfully");
             else System.out.println("ERROR  [" + dtFormatLong.format(new Date())
-                    + "] Failed to add field: \"" + name + "\"");
+                    + "] Failed to add field \"" + name + "\"");
         } catch (IOException e) {
             e.printStackTrace();
         }
