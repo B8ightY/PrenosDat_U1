@@ -13,6 +13,10 @@ import java.util.concurrent.TimeUnit;
  * Hello IoT!
  */
 public class App {
+
+    static SimpleDateFormat dtFormatShort = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+    static SimpleDateFormat dtFormatLong = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss,SSS");
+
     public static void main(String[] args) throws InterruptedException {
         IotNode iotNode = new IotNode();
         HouseHold houseHold = new HouseHold();
@@ -28,27 +32,34 @@ public class App {
 
         // Skontroluje existujuce fieldy v tabulke a prida pozadovane chybajuce
         String[] reqFields = {"airTemp", "windSpeed", "stationName"};
-        HouseHoldField.checkExistingFields(houseHold, reqFields);
+        HouseHoldField.checkExistingFields(houseHold, reqFields, dtFormatLong);
 
         // Posiela na HouseHold vybrane udaje o pocasi kazdu minutu
         while(true) {
-            Call<WeatherData> currentWeatherCall = iotNode.getWeatherStationService().getCurrentWeatherAuth(token.getToken(), "station_1");
+            Call<WeatherData> currentWeatherCall = iotNode.getWeatherStationService()
+                    .getCurrentWeatherAuth(token.getToken(), "station_1");
 
             try {
                 Response<WeatherData> weatherDataResponse = currentWeatherCall.execute();
 
                 if(weatherDataResponse.isSuccessful()) {
                     WeatherData currentWeather = weatherDataResponse.body();
-                    String dateTime = (new SimpleDateFormat("dd/MM/yyyy HH:mm")).format(new Date());
+                    String currDateTime = dtFormatShort.format(new Date());
 
                     assert currentWeather != null;
-                    HouseHoldData airTemp = new HouseHoldData(dateTime, currentWeather.getAirTemperature().toString(), "double");
-                    HouseHoldData windSpeed = new HouseHoldData(dateTime, currentWeather.getWindSpeed().toString(), "double");
-                    HouseHoldData stationName = new HouseHoldData(dateTime, currentWeather.getStationName(), "string");
+                    HouseHoldData airTemp = new HouseHoldData(currDateTime,
+                            currentWeather.getAirTemperature().toString(), "double");
+                    HouseHoldData windSpeed = new HouseHoldData(currDateTime,
+                            currentWeather.getWindSpeed().toString(), "double");
+                    HouseHoldData stationName = new HouseHoldData(currDateTime,
+                            currentWeather.getStationName(), "string");
 
-                    checkSendSuccess((houseHold.getHouseHoldService().sendHouseHoldData("1", reqFields[0], airTemp)).execute(), reqFields[0]);
-                    checkSendSuccess((houseHold.getHouseHoldService().sendHouseHoldData("1", reqFields[1], windSpeed)).execute(), reqFields[1]);
-                    checkSendSuccess((houseHold.getHouseHoldService().sendHouseHoldData("1", reqFields[2], stationName)).execute(), reqFields[2]);
+                    checkSendSuccess((houseHold.getHouseHoldService().sendHouseHoldData("1", reqFields[0],
+                            airTemp)).execute(), reqFields[0]);
+                    checkSendSuccess((houseHold.getHouseHoldService().sendHouseHoldData("1", reqFields[1],
+                            windSpeed)).execute(), reqFields[1]);
+                    checkSendSuccess((houseHold.getHouseHoldService().sendHouseHoldData("1", reqFields[2],
+                            stationName)).execute(), reqFields[2]);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -60,9 +71,9 @@ public class App {
 
     private static void checkSendSuccess(Response response, String valueName) {
         if(response.isSuccessful())
-            System.out.println("INFO  [" + (new SimpleDateFormat("dd/MM/yyyy HH:mm:ss,SSS"))
-                    .format(new Date()) + "] Value \"" + valueName + "\" sent successfully");
-        else System.out.println("ERROR  [" + (new SimpleDateFormat("dd/MM/yyyy HH:mm:ss,SSS"))
-                .format(new Date()) + "] Failed to send value: \"" + valueName + "\"");
+            System.out.println("INFO  [" + dtFormatLong.format(new Date())
+                    + "] Value \"" + valueName + "\" sent successfully");
+        else System.out.println("ERROR  [" + dtFormatLong.format(new Date())
+                + "] Failed to send value: \"" + valueName + "\"");
     }
 }

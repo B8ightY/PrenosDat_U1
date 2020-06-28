@@ -57,7 +57,7 @@ public class HouseHoldField {
                 ", description='" + description + '\'';
     }
 
-    public static void checkExistingFields(HouseHold houseHold, String[] reqFields) {
+    public static void checkExistingFields(HouseHold houseHold, String[] reqFields, SimpleDateFormat dtFormatLong) {
         Call<List<HouseHoldField>> allFields = houseHold.getHouseHoldService().getAllFields();
         try {
             Response<List<HouseHoldField>> response = allFields.execute();
@@ -74,7 +74,7 @@ public class HouseHoldField {
                             break;
                         }
                     }
-                    if(!found) addMissingField(houseHold, field);
+                    if(!found) addMissingField(houseHold, field, dtFormatLong);
                 }
             }
         } catch (IOException e) {
@@ -82,34 +82,36 @@ public class HouseHoldField {
         }
     }
 
-    private static void addMissingField(HouseHold houseHold, String name) {
+    private static void addMissingField(HouseHold houseHold, String name, SimpleDateFormat dtFormatLong) {
         HouseHoldField stationNameField;
 
         switch(name) {
             case "airTemp":
                 stationNameField = new HouseHoldField("airTemp", "°C", "Teplota vzduchu");
                 break;
+
             case "windSpeed":
                 stationNameField = new HouseHoldField("windSpeed", "m/s", "Rýchlosť vetra");
                 break;
+
             case "stationName":
                 stationNameField = new HouseHoldField("stationName", null, "Názov stanice");
                 break;
+
             default:
-                System.out.println("ERROR  [" + (new SimpleDateFormat("dd/MM/yyyy HH:mm:ss,SSS"))
-                        .format(new Date()) + "] No rule to add field with name: \"" + name + "\"");
-                return;
+                System.out.println("ERROR  [" + dtFormatLong.format(new Date())
+                        + "] No rule to add field with name: \"" + name + "\"");
+                throw new IllegalStateException("Unexpected value: " + name);
         }
 
-        System.out.println("INFO  [" + (new SimpleDateFormat("dd/MM/yyyy HH:mm:ss,SSS"))
-                .format(new Date()) + "] Adding missing field: \"" + name + "\"");
+        System.out.println("INFO  [" + dtFormatLong.format(new Date()) + "] Adding missing field: \"" + name + "\"");
 
         try {
             if(((houseHold.getHouseHoldService().createField(stationNameField)).execute()).isSuccessful())
-                System.out.println("INFO  [" + (new SimpleDateFormat("dd/MM/yyyy HH:mm:ss,SSS"))
-                        .format(new Date()) + "] Field \"" + name + "\" added successfully");
-            else System.out.println("ERROR  [" + (new SimpleDateFormat("dd/MM/yyyy HH:mm:ss,SSS"))
-                    .format(new Date()) + "] Failed to add field: \"" + name + "\"");
+                System.out.println("INFO  [" + dtFormatLong.format(new Date())
+                        + "] Field \"" + name + "\" added successfully");
+            else System.out.println("ERROR  [" + dtFormatLong.format(new Date())
+                    + "] Failed to add field: \"" + name + "\"");
         } catch (IOException e) {
             e.printStackTrace();
         }
